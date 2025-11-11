@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "My Query Params Manifest",
+  "version": "1.0.0",
+  "icons": {
+    "32": "spiderman_emoji.png"
+  },
+  "action": {
+    "default_popup": "index.html"
+  },
+  "permissions": ["scripting"],
+  "host_permissions": ["http://*/*", "https://*/*"]
+}
