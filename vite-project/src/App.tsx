@@ -1,45 +1,60 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react'
+import './style/App.css'
+import {getNotes as getLocalNotes, getNotesLength} from './services/saveNotesLocalStorage'
+import {subscribeToNotesChanges, addNote, getNextId, initService as initNotesService} from './services/notesService'
+import type { Note } from './types'
+import InputSelection from './InputSelection'
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  const onClick = async () => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      function: () => {
-        alert('Hello from your Chrome extension!')
+  const [notes, setNotes] = useState<Note[]>(getLocalNotes() as Note[])
+  const [nextId, setNextId] = useState(getNextId())
+  
+  useEffect(() => {
+    console.log('effect');
+    
+    subscribeToNotesChanges((notes, newNoteId) => {
+      console.log('subscriber');
+      
+      setNotes(notes)
+      setNextId(newNoteId)
+    })
+    initNotesService()
+  },[])
+  
+  const handleAddNote = (inputValue: string) => {
+    console.log(`next id: ${nextId}`)
+    if (inputValue.trim() !== '') {
+      const newNote: Note = {
+        id: nextId,
+        text: inputValue.trim()
       }
-    }); 
-    setCount(count + 1)
-  } 
+      
+      addNote(newNote)
+    }
+    console.log(`notes length: ${getNotesLength()}`)
+  }
+
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="app">
+      <div className="container">
+        <h1 className="title">Notes</h1>
+        
+        <InputSelection addNote={handleAddNote} />
+
+        <div className="notes-list">
+          {notes.length === 0 ? (
+            <p className="empty-state">No notes yet. Add one above!</p>
+          ) : (
+            notes.map((note) => (
+              <div key={note.id} className="note" id={`${note.id}`}>
+                {note.text} - id: {note.id}
+              </div>
+            ))
+          )}
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => onClick()}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
