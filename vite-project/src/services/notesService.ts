@@ -49,6 +49,15 @@ function getNextId(){
 }
 
 function subscribeToNotesChanges(callback: NewNoteCallback){
-    cbs.push(callback)
+    return cbs.push(callback) - 1
 }
-export {setNotes, addNote, removeNote, getNotes, subscribeToNotesChanges, getNextId, initService}
+
+function unsubscribeToNotrsChanges(subIdx: number) {
+    delete cbs[subIdx]
+    //todo: handle undefined (problem because other will get thei idxs based on the array before the undefined removal)
+}
+export {setNotes, addNote,
+    removeNote, getNotes,
+    subscribeToNotesChanges, unsubscribeToNotrsChanges,
+    getNextId, 
+    initService}

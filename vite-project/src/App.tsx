@@ -1,28 +1,30 @@
 import { useEffect, useState } from 'react'
 import './style/App.css'
-import {getNotes as getLocalNotes, getNotesLength} from './services/saveNotesLocalStorage'
-import {subscribeToNotesChanges, addNote, getNextId, initService as initNotesService} from './services/notesService'
+import {getNotes as getLocalNotes} from './services/saveNotesLocalStorage'
+import {
+  subscribeToNotesChanges,
+  unsubscribeToNotrsChanges,
+  addNote, getNextId, initService as initNotesService} from './services/notesService'
 import type { Note } from './types'
 import InputSelection from './InputSelection'
-
+ 
 function App() {
   const [notes, setNotes] = useState<Note[]>(getLocalNotes() as Note[])
   const [nextId, setNextId] = useState(getNextId())
   
   useEffect(() => {
-    console.log('effect');
-    
-    subscribeToNotesChanges((notes, newNoteId) => {
-      console.log('subscriber');
-      
+    const subIdx = subscribeToNotesChanges((notes, newNoteId) => {
       setNotes(notes)
       setNextId(newNoteId)
     })
     initNotesService()
+
+    return () => {
+      unsubscribeToNotrsChanges(subIdx)
+    }
   },[])
   
   const handleAddNote = (inputValue: string) => {
-    console.log(`next id: ${nextId}`)
     if (inputValue.trim() !== '') {
       const newNote: Note = {
         id: nextId,
@@ -31,7 +33,6 @@ function App() {
       
       addNote(newNote)
     }
-    console.log(`notes length: ${getNotesLength()}`)
   }
 
 
