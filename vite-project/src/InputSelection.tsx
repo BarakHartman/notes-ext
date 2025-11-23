@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import './style/InputSelection.css'
 
-function InputSelection({  addNote }: { addNote: (inputValue: string) => void }) {
+function InputSelection({  addNote }: { addNote: (inputValue: string) => void | Promise<void> }) {
   const [inputValue, setInputValue] = useState('')
 
   
   const handleAdd = () => {
+    // addNote can be async now (with IndexedDB), but we don't need to await it
+    // The UI updates optimistically, and errors are handled in the service
     addNote(inputValue)
     setInputValue('')
   }

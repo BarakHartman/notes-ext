@@ -1,23 +1,35 @@
 import { useEffect, useState } from 'react'
 import './style/App.css'
-import {getNotes as getLocalNotes} from './services/saveNotesLocalStorage'
 import {
   subscribeToNotesChanges,
   unsubscribeToNotrsChanges,
-  addNote, getNextId, initService as initNotesService} from './services/notesService'
+  addNote, initService as initNotesService} from './services/notesService'
 import type { Note } from './types'
 import InputSelection from './InputSelection'
- 
+// Import storage strategies
+import localStorageStrategy from './services/saveNotesLocalStorage'
+import indexedDBStrategy from './services/saveNotesIndexedDB'
+
+// Choose which storage strategy to use
+// Change this to 'indexedDB' to use IndexedDB, or 'localStorage' for localStorage
+type StorageType = 'localStorage' | 'indexedDB'
+const STORAGE_STRATEGY: StorageType = 'localStorage' // or 'indexedDB'
+
 function App() {
-  const [notes, setNotes] = useState<Note[]>(getLocalNotes() as Note[])
-  const [nextId, setNextId] = useState(getNextId())
+  const [notes, setNotes] = useState<Note[]>([])
+  const [nextId, setNextId] = useState(1)
   
   useEffect(() => {
     const subIdx = subscribeToNotesChanges((notes, newNoteId) => {
       setNotes(notes)
       setNextId(newNoteId)
     })
-    initNotesService()
+    
+    // Initialize service with the chosen storage strategy
+    const strategy = STORAGE_STRATEGY === 'indexedDB' ? indexedDBStrategy : localStorageStrategy
+    initNotesService(strategy).catch(err => {
+      console.error('Failed to initialize notes service:', err)
+    })
 
     return () => {
       unsubscribeToNotrsChanges(subIdx)
