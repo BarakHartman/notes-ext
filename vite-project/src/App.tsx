@@ -26,7 +26,6 @@ function App() {
       console.error('Failed to initialize notes service:', err)
     })
 
-    // No cleanup needed for now
   },[])
   
   const handleAddNote = (inputValue: string) => {
