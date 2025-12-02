@@ -1,5 +1,5 @@
-import { getStorage, setStorage } from "./localStorageService";
-import type { Note, StorageStrategy } from "../types";
+import { getStorage, setStorage } from "../localStorageService";
+import type { Note, StorageStrategy } from "../../../types";
 
 /**
  * localStorage Storage Strategy Implementation
@@ -38,7 +38,8 @@ const localStorageStrategy: StorageStrategy = {
   setNotes,
   getLastNoteId,
   setLastNoteId,
-  getNotesLength
+  getNotesLength,
+  addNote
 };
 
 export default localStorageStrategy;

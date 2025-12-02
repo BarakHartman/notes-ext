@@ -1,9 +1,13 @@
 export interface Note {
-    id: number
+    id?: number
     text: string
-  }
+}
 
-export type NewNoteCallback = (notes: Note[], newNoteId: number) => void
+export interface SignedNote extends Note {
+  id: number
+}
+
+export type NewNoteCallback = (notes: Note[]) => void
 
 /**
  * Storage Strategy Interface
@@ -13,6 +17,7 @@ export type NewNoteCallback = (notes: Note[], newNoteId: number) => void
 export interface StorageStrategy {
   getNotes(): Promise<Note[]>
   setNotes(notes: Note[]): Promise<void>
+  addNote(note: Note): Promise<Note>
   getLastNoteId(): Promise<number>
   setLastNoteId(id: number): Promise<void>
   getNotesLength(): Promise<number>

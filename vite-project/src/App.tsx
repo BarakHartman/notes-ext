@@ -7,8 +7,9 @@ import {
 import type { Note } from './types'
 import InputSelection from './InputSelection'
 // Import storage strategies
-import localStorageStrategy from './services/saveNotesLocalStorage'
-import indexedDBStrategy from './services/saveNotesIndexedDB'
+import localStorageStrategy from './services/saveNoteStrategy/localStorage'
+import indexedDBStrategy from './services/saveNoteStrategy/indexedDB'
+import { getTasks } from './services/todoistService'
 
 // Choose which storage strategy to use
 // Change this to 'indexedDB' to use IndexedDB, or 'localStorage' for localStorage
@@ -16,13 +17,12 @@ type StorageType = 'localStorage' | 'indexedDB'
 const STORAGE_STRATEGY: StorageType = 'localStorage' // or 'indexedDB'
 
 function App() {
+  //todo: use the getTasks to init the notes in the
   const [notes, setNotes] = useState<Note[]>([])
-  const [nextId, setNextId] = useState(1)
   
   useEffect(() => {
-    const subIdx = subscribeToNotesChanges((notes, newNoteId) => {
+    const subIdx = subscribeToNotesChanges((notes) => {
       setNotes(notes)
-      setNextId(newNoteId)
     })
     
     // Initialize service with the chosen storage strategy
@@ -38,15 +38,9 @@ function App() {
   
   const handleAddNote = (inputValue: string) => {
     if (inputValue.trim() !== '') {
-      const newNote: Note = {
-        id: nextId,
-        text: inputValue.trim()
-      }
-      
-      addNote(newNote)
+      addNote(inputValue)
     }
   }
-
 
   return (
     <div className="app">

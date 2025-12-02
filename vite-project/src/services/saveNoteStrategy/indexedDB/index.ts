@@ -1,5 +1,5 @@
 import indexedDBService from './indexedDBService'
-import type { Note, StorageStrategy } from '../types'
+import type { Note, StorageStrategy } from '../../../types'
 
 /**
  * IndexedDB Storage Strategy Implementation
@@ -55,7 +55,8 @@ const indexedDBStrategy: StorageStrategy = {
   setNotes,
   getLastNoteId,
   setLastNoteId,
-  getNotesLength
+  getNotesLength,
+  addNote
 };
 
 export default indexedDBStrategy;
