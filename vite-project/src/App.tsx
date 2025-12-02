@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import './style/App.css'
 import {
-  subscribeToNotesChanges,
-  unsubscribeToNotrsChanges,
-  addNote, initService as initNotesService} from './services/notesService'
-import type { Note } from './types'
+  addNote,
+  initService as initNotesService,
+} from './services/notesService'
 import InputSelection from './InputSelection'
 // Import storage strategies
 import localStorageStrategy from './services/saveNoteStrategy/localStorage'
 import indexedDBStrategy from './services/saveNoteStrategy/indexedDB'
-import { getTasks } from './services/todoistService'
+import { useNotesStore } from './store/useNotesStore'
+import type { Note } from './types'
 
 // Choose which storage strategy to use
 // Change this to 'indexedDB' to use IndexedDB, or 'localStorage' for localStorage
@@ -17,23 +17,16 @@ type StorageType = 'localStorage' | 'indexedDB'
 const STORAGE_STRATEGY: StorageType = 'localStorage' // or 'indexedDB'
 
 function App() {
-  //todo: use the getTasks to init the notes in the
-  const [notes, setNotes] = useState<Note[]>([])
+  const notes = useNotesStore((state: { notes: Note[] }) => state.notes)
   
   useEffect(() => {
-    const subIdx = subscribeToNotesChanges((notes) => {
-      setNotes(notes)
-    })
-    
     // Initialize service with the chosen storage strategy
     const strategy = STORAGE_STRATEGY === 'indexedDB' ? indexedDBStrategy : localStorageStrategy
     initNotesService(strategy).catch(err => {
       console.error('Failed to initialize notes service:', err)
     })
 
-    return () => {
-      unsubscribeToNotrsChanges(subIdx)
-    }
+    // No cleanup needed for now
   },[])
   
   const handleAddNote = (inputValue: string) => {
@@ -53,7 +46,7 @@ function App() {
           {notes.length === 0 ? (
             <p className="empty-state">No notes yet. Add one above!</p>
           ) : (
-            notes.map((note) => (
+            notes.map((note: Note) => (
               <div key={note.id} className="note" id={`${note.id}`}>
                 {note.text} - id: {note.id}
               </div>

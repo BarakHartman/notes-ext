@@ -1,4 +1,5 @@
 import type {Note, NewNoteCallback, StorageStrategy} from '../types'
+import { useNotesStore } from '../store/useNotesStore'
 
 let notes: Note[] = []
 const onNewNoteCB: NewNoteCallback[] = []
@@ -14,10 +15,12 @@ async function initService(strategy: StorageStrategy){
     
     try {
         notes = await strategy.getNotes() || []
+        useNotesStore.getState().setNotes(notes)
         onNewNoteCB.forEach(cb => cb(notes))
     } catch (error) {
         console.error('Error initializing notes service:', error)
         notes = []
+        useNotesStore.getState().setNotes(notes)
         onNewNoteCB.forEach(cb => cb(notes))
     }
 }
@@ -28,6 +31,7 @@ function setNotes(newNotes: Note[]){
     if (storageStrategy) {
         storageStrategy.setNotes(notes).catch(err => console.error('Error saving notes:', err))
     }
+    useNotesStore.getState().setNotes(notes)
     onNewNoteCB.forEach(cb => cb(notes))
 }
 
@@ -46,6 +50,7 @@ async function addNote(text: string){
         // Update local state immediately for responsive UI
         const updatedNotes = await storageStrategy.getNotes()
         notes = updatedNotes // or alternatively: notes.push(newNote) w/o fectching all notes again
+        useNotesStore.getState().setNotes(notes)
         
         // Notify subscribers
         onNewNoteCB.forEach(cb => cb(notes))
