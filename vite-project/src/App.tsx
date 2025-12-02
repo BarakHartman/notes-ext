@@ -1,9 +1,6 @@
 import { useEffect } from 'react'
 import './style/App.css'
-import {
-  addNote,
-  initService as initNotesService,
-} from './services/notesService'
+import { NotesService } from './services/notesService'
 import InputSelection from './InputSelection'
 // Import storage strategies
 import localStorageStrategy from './services/saveNoteStrategy/localStorage'
@@ -17,12 +14,13 @@ type StorageType = 'localStorage' | 'indexedDB'
 const STORAGE_STRATEGY: StorageType = 'localStorage' // or 'indexedDB'
 
 function App() {
+  const notesService = new NotesService()
   const notes = useNotesStore((state: { notes: Note[] }) => state.notes)
   
   useEffect(() => {
     // Initialize service with the chosen storage strategy
     const strategy = STORAGE_STRATEGY === 'indexedDB' ? indexedDBStrategy : localStorageStrategy
-    initNotesService(strategy).catch(err => {
+    notesService.initService(strategy).catch(err => {
       console.error('Failed to initialize notes service:', err)
     })
 
@@ -30,7 +28,7 @@ function App() {
   
   const handleAddNote = (inputValue: string) => {
     if (inputValue.trim() !== '') {
-      addNote(inputValue)
+      notesService.addNote(inputValue)
     }
   }
 
