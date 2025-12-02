@@ -1,8 +1,6 @@
-import type {Note, NewNoteCallback, StorageStrategy} from '../types'
+import type {Note, StorageStrategy} from '../types'
 import { useNotesStore } from '../store/useNotesStore'
 
-let notes: Note[] = []
-const onNewNoteCB: NewNoteCallback[] = []
 let storageStrategy: StorageStrategy | null = null
 
 /**
@@ -13,26 +11,15 @@ async function initService(strategy: StorageStrategy){
     console.log('Initializing notes service with storage strategy...');
     storageStrategy = strategy
     
+    let notes: Note[]
     try {
         notes = await strategy.getNotes() || []
-        useNotesStore.getState().setNotes(notes)
-        onNewNoteCB.forEach(cb => cb(notes))
     } catch (error) {
         console.error('Error initializing notes service:', error)
         notes = []
-        useNotesStore.getState().setNotes(notes)
-        onNewNoteCB.forEach(cb => cb(notes))
     }
-}
 
-function setNotes(newNotes: Note[]){
-    notes = [...newNotes]
-    // Save to storage (async, but we don't wait - fire and forget)
-    if (storageStrategy) {
-        storageStrategy.setNotes(notes).catch(err => console.error('Error saving notes:', err))
-    }
     useNotesStore.getState().setNotes(notes)
-    onNewNoteCB.forEach(cb => cb(notes))
 }
 
 async function addNote(text: string){
@@ -48,37 +35,22 @@ async function addNote(text: string){
         console.log(`new note: ${newNote}`);
         
         // Update local state immediately for responsive UI
-        const updatedNotes = await storageStrategy.getNotes()
-        notes = updatedNotes // or alternatively: notes.push(newNote) w/o fectching all notes again
+        // altenatively we get fetch notes from store, add the new one (hard ocding it) and re-set it
+        const notes = await storageStrategy.getNotes()
         useNotesStore.getState().setNotes(notes)
-        
-        // Notify subscribers
-        onNewNoteCB.forEach(cb => cb(notes))
     } catch (error) {
         console.error('Error saving note to storage:', error)
-        // Rollback local state on error
-        notes = notes.slice(0, -1)
         throw error
     }
 }
 
 function removeNote(id: number){
-    notes = notes.filter(n => n.id !== id)
+    // todo
+    // notes = notes.filter(n => n.id !== id)
 }
 
-function getNotes(): Note[]{
-    return notes
+export {
+    addNote,
+    removeNote,
+    initService
 }
-
-function subscribeToNotesChanges(callback: NewNoteCallback){
-    return onNewNoteCB.push(callback) - 1
-}
-
-function unsubscribeToNotrsChanges(subIdx: number) {
-    delete onNewNoteCB[subIdx]
-    //todo: handle undefined (problem because other will get thei idxs based on the array before the undefined removal)
-}
-export {setNotes, addNote,
-    removeNote, getNotes,
-    subscribeToNotesChanges, unsubscribeToNotrsChanges,
-    initService}
