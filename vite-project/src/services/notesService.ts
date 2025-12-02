@@ -17,7 +17,6 @@ async function initService(strategy: StorageStrategy){
         onNewNoteCB.forEach(cb => cb(notes))
     } catch (error) {
         console.error('Error initializing notes service:', error)
-        // Fallback to empty state
         notes = []
         onNewNoteCB.forEach(cb => cb(notes))
     }
@@ -33,29 +32,20 @@ function setNotes(newNotes: Note[]){
 }
 
 async function addNote(text: string){
+    const serializedText = text.trim()
     if (!storageStrategy) {
         console.error('Storage strategy not initialized')
         return
     }
     
     try {
-        // Fetch nextId from the strategy
-        const lastId = await storageStrategy.getLastNoteId()
-        const nextId = lastId + 1
-        
-        const newNote: Note = {
-            id: nextId,
-            text: text.trim()
-        }
-        
+        // Save to storage and update lastNoteId
+        const newNote = await storageStrategy.addNote(serializedText)
         console.log(`new note: ${newNote}`);
         
         // Update local state immediately for responsive UI
-        notes.push(newNote)
-        
-        // Save to storage and update lastNoteId
-        await storageStrategy.setNotes(notes)
-        await storageStrategy.setLastNoteId(nextId)
+        const updatedNotes = await storageStrategy.getNotes()
+        notes = updatedNotes // or alternatively: notes.push(newNote) w/o fectching all notes again
         
         // Notify subscribers
         onNewNoteCB.forEach(cb => cb(notes))

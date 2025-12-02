@@ -7,8 +7,18 @@ import type { Note, StorageStrategy } from '../../../types'
  * This mirrors the localStorage service but uses IndexedDB instead
  */
 
-async function getNotesLength(): Promise<number> {
-  return await indexedDBService.countNotes()
+async function addNote(serializedText: string): Promise<Note> {
+  const lastId = await indexedDBService.getMetadata('lastNoteId')
+  const newId = (Number.parseInt(String(lastId)) || 0) + 1
+  const newNote: Note = {
+    id: newId,
+    text: serializedText
+  }
+  
+  await indexedDBService.putNote(newNote)
+  await indexedDBService.setMetadata('lastNoteId', newId)
+  
+  return newNote
 }
 
 async function setNotes(notes: Note[]): Promise<void> {
@@ -22,20 +32,6 @@ async function setNotes(notes: Note[]): Promise<void> {
   // In production, you could batch them in a single transaction
   for (const note of notes) {
     await indexedDBService.putNote(note)
-  }
-}
-
-async function setLastNoteId(id: number): Promise<void> {
-  await indexedDBService.setMetadata('lastNoteId', id)
-}
-
-async function getLastNoteId(): Promise<number> {
-  try {
-    const id = await indexedDBService.getMetadata('lastNoteId')
-    return Number.parseInt(String(id)) || 0
-  } catch (error) {
-    console.error('Error getting last note id:', error)
-    throw error
   }
 }
 
@@ -53,12 +49,8 @@ indexedDBService.init().catch((error) => {
 const indexedDBStrategy: StorageStrategy = {
   getNotes,
   setNotes,
-  getLastNoteId,
-  setLastNoteId,
-  getNotesLength,
   addNote
 };
 
 export default indexedDBStrategy;
-export { getNotesLength, setNotes, setLastNoteId, getLastNoteId, getNotes }
 

@@ -17,8 +17,5 @@ export type NewNoteCallback = (notes: Note[]) => void
 export interface StorageStrategy {
   getNotes(): Promise<Note[]>
   setNotes(notes: Note[]): Promise<void>
-  addNote(note: Note): Promise<Note>
-  getLastNoteId(): Promise<number>
-  setLastNoteId(id: number): Promise<void>
-  getNotesLength(): Promise<number>
+  addNote(serializedText: string): Promise<Note>
 }
