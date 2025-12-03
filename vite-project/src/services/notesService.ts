@@ -4,11 +4,11 @@ import { useNotesStore } from '../store/useNotesStore'
 class NotesService {
   private storageStrategy: StorageStrategy | null = null
 
-  /**
-   * Initialize the service with a storage strategy
-   * @param strategy - The storage strategy to use (localStorage or IndexedDB)
-   */
-  async initService(strategy: StorageStrategy): Promise<void> {
+async initService(strategy: StorageStrategy): Promise<void> {  
+    return this.setSaveStrategy(strategy)
+  }
+
+  async setSaveStrategy(strategy: StorageStrategy): Promise<void> {
     console.log('Initializing notes service with storage strategy...')
     this.storageStrategy = strategy
 

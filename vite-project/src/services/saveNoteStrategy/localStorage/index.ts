@@ -1,4 +1,4 @@
-import { getStorage, setStorage } from "../localStorageService";
+import { getStorage, setStorage } from "./localStorageService";
 import type { Note, StorageStrategy } from "../../../types";
 
 /**

@@ -1,4 +1,4 @@
-import type { Note } from '../types'
+import type { Note } from '../../../types'
 
 // Database configuration
 const DB_NAME = 'NotesExtensionDB'

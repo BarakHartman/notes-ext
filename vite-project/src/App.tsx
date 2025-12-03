@@ -11,10 +11,10 @@ import type { Note } from './types'
 // Choose which storage strategy to use
 // Change this to 'indexedDB' to use IndexedDB, or 'localStorage' for localStorage
 type StorageType = 'localStorage' | 'indexedDB'
-const STORAGE_STRATEGY: StorageType = 'localStorage' // or 'indexedDB'
+const STORAGE_STRATEGY: StorageType = 'indexedDB' // or 'indexedDB'
 
+const notesService = new NotesService()
 function App() {
-  const notesService = new NotesService()
   const notes = useNotesStore((state: { notes: Note[] }) => state.notes)
   
   useEffect(() => {
@@ -35,7 +35,7 @@ function App() {
   return (
     <div className="app">
       <div className="container">
-        <h1 className="title">Notes</h1>
+        <h1 className="title">Notes!</h1>
         
         <InputSelection addNote={handleAddNote} />
 
